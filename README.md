@@ -31,6 +31,14 @@ yarn run start:dev
 yarn run start:prod
 ```
 
+## Deploying the app
+
+Copy `release.env.example` to `release.env`. Then, run:
+
+```bash
+bash release.sh
+```
+
 ## Debugging
 
 The launch configuration for VSCode is available. Press F5 or go to `Run -> Start debugging` in the menu.
