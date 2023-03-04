@@ -5,10 +5,13 @@ export class SubtaskDto {
 
   name!: string;
 
+  isCompleted!: boolean;
+
   static fromEntity(subtask: SubtaskEntity): SubtaskDto {
     return {
       id: subtask.id,
       name: subtask.name,
+      isCompleted: subtask.isCompleted,
     };
   }
 

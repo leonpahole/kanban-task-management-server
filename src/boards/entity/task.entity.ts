@@ -8,6 +8,7 @@ import {
   OneToMany,
   DeleteDateColumn,
   Generated,
+  RelationId,
 } from 'typeorm';
 import { ColumnEntity } from './column.entity';
 import { SubtaskEntity } from './subtask.entity';
@@ -29,6 +30,9 @@ export class TaskEntity {
 
   @ManyToOne(() => ColumnEntity, (column) => column.tasks)
   column!: ColumnEntity;
+
+  @RelationId((task: TaskEntity) => task.column)
+  columnId: number;
 
   @OneToMany(() => SubtaskEntity, (subtask) => subtask.task)
   subtasks!: SubtaskEntity[];

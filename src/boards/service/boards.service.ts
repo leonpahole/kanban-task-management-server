@@ -49,7 +49,10 @@ export class BoardsService {
       },
       order: {
         createdAt: 'DESC',
-        columns: { sequenceNumber: 'ASC', tasks: { sequenceNumber: 'ASC' } },
+        columns: {
+          sequenceNumber: 'ASC',
+          tasks: { sequenceNumber: 'ASC', subtasks: { createdAt: 'DESC' } },
+        },
       },
       relations: {
         columns: {
@@ -113,20 +116,16 @@ export class BoardsService {
     await this.createColumns(board, columnsToAdd);
 
     const columnsToUpdate = req.columns.filter((c) => board.columns.some((col) => col.id === c.id));
-    await this.columnsRepository
-      .createQueryBuilder()
-      .insert()
-      .into(ColumnEntity)
-      .values(columnsToUpdate.map((c) => ({ id: c.id, name: c.name })))
-      .orUpdate(['name'], 'PK_cee3c7ee3135537fb8f5df4422b')
-      .execute();
+    for (const column of columnsToUpdate) {
+      await this.columnsRepository.update({ id: column.id, board: { id } }, { name: column.name });
+    }
 
     const columnsToRemove = board.columns.filter(
       (c) => !req.columns.some((col) => col.id === c.id),
     );
 
     await this.columnsRepository.update(
-      { id: In(columnsToRemove.map((c) => c.id)) },
+      { id: In(columnsToRemove.map((c) => c.id)), board: { id } },
       { deletedAt: new Date() },
     );
 

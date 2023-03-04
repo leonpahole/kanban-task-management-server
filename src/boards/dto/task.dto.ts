@@ -6,7 +6,7 @@ export class TaskDto {
 
   title!: string;
 
-  columnId?: number;
+  columnId!: number;
 
   description!: string;
 
@@ -16,7 +16,7 @@ export class TaskDto {
     return {
       id: task.id,
       title: task.title,
-      columnId: task.column?.id,
+      columnId: task.columnId,
       description: task.description,
       subtasks: SubtaskDto.fromEntities(task.subtasks),
     };

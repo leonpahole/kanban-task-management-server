@@ -44,6 +44,9 @@ export class TasksService {
         deletedAt: IsNull(),
       },
       relations,
+      order: {
+        subtasks: { createdAt: 'DESC' },
+      },
     });
 
     if (!task) {
@@ -105,6 +108,7 @@ export class TasksService {
         subtasks.map((s) => ({
           task,
           name: s.name,
+          isCompleted: false,
         })),
       )
       .execute();
@@ -129,43 +133,49 @@ export class TasksService {
       }
     }
 
-    const subtasksToAdd = req.subtasks.filter((c) => c.id == null);
-    await this.createSubtasks(task, subtasksToAdd);
+    if (req.subtasks) {
+      const subtasksToAdd = req.subtasks.filter((c) => c.id == null);
+      await this.createSubtasks(task, subtasksToAdd);
 
-    const subtasksToUpdate = req.subtasks.filter((c) =>
-      task.subtasks.some((col) => col.id === c.id),
-    );
+      const subtasksToUpdate = req.subtasks.filter((c) =>
+        task.subtasks.some((col) => col.id === c.id),
+      );
 
-    await this.subtasksRepository
-      .createQueryBuilder()
-      .insert()
-      .into(SubtaskEntity)
-      .values(subtasksToUpdate.map((c) => ({ id: c.id, name: c.name })))
-      .orUpdate(['name'], 'PK_cee3c7ee3135537fb8f5df4422b')
-      .execute();
+      for (const subtask of subtasksToUpdate) {
+        await this.subtasksRepository.update(
+          { id: subtask.id, task: { id } },
+          { name: subtask.name },
+        );
+      }
 
-    const subtasksToRemove = task.subtasks.filter(
-      (t) => !req.subtasks.some((st) => st.id === t.id),
-    );
+      const subtasksToRemove = task.subtasks.filter(
+        (t) => !req.subtasks.some((st) => st.id === t.id),
+      );
 
-    await this.subtasksRepository.update(
-      { id: In(subtasksToRemove.map((c) => c.id)) },
-      { deletedAt: new Date() },
-    );
+      await this.subtasksRepository.update(
+        { id: In(subtasksToRemove.map((c) => c.id)), task: { id } },
+        { deletedAt: new Date() },
+      );
+    }
 
     await this.tasksRespository.update(
-      { id: task.id, description: task.description, column: columnToUpdate },
-      { title: req.title },
+      {
+        id: task.id,
+      },
+      { title: req.title, description: req.description, column: columnToUpdate },
     );
 
     return this.get(id, userId);
   }
 
   public async delete(id: number, userId: string): Promise<SuccessResponseDto> {
-    const deleteResult = await this.tasksRespository.update(
-      { id, column: { board: { userId } } },
-      { deletedAt: new Date() },
-    );
+    const task = this.getEntity(id, userId);
+
+    if (!task) {
+      throw new EntityNotFoundException();
+    }
+
+    const deleteResult = await this.tasksRespository.update({ id }, { deletedAt: new Date() });
 
     if (!deleteResult.affected) {
       throw new EntityNotFoundException();
