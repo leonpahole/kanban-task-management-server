@@ -1,0 +1,10 @@
+node_modules
+dist
+package.json
+Makefile
+docker-compose*.yml
+README.md
+tsconfig.json
+*.sh
+test/coverage
+*.json

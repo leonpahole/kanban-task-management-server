@@ -2,14 +2,11 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: 'tsconfig.json',
-    tsconfigRootDir : __dirname, 
+    tsconfigRootDir: __dirname,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
-  extends: [
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ],
+  plugins: [],
+  extends: ['airbnb-base', 'airbnb-typescript/base', 'prettier'],
   root: true,
   env: {
     node: true,
@@ -17,9 +14,21 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
-    '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
+    'import/no-default-export': ['error'],
+    'import/prefer-default-export': 'off',
+    'arrow-body-style': 'off',
+    'class-methods-use-this': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'error',
+    'import/no-extraneous-dependencies': 'off',
+    'import/no-cycle': 'off',
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: ['src/*'],
+      },
+    ],
+    'no-restricted-syntax': 'off',
+    'no-await-in-loop': 'off',
+    'no-plusplus': 'off',
   },
 };
